@@ -29,6 +29,7 @@ def service():
     # Parse request.
     try:
         request_json = request.get_json()
+        app.logger.info(f'Request json: {request_json}')
         from_user_name = request_json["FromUserName"]
         to_user_name = request_json["ToUserName"]
         user_content = request_json["Content"]
@@ -73,6 +74,7 @@ def service():
             "MsgType": "text",
             "Content": response_content,
         }
+        app.logger.info(f'Response json: {response_json}')
     except Exception:
         print(traceback.format_exc())
 
