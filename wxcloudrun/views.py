@@ -6,7 +6,7 @@ from wxcloudrun.model import Counters
 from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
 
 import traceback
-
+import random
 
 @app.route('/')
 def index():
@@ -17,6 +17,53 @@ def index():
 
 @app.route('/api/service', methods=['GET', 'POST'])
 def service():
+    # Parse request.
+    try:
+        request_json = request.get_json()
+        from_user_name = request_json["FromUserName"]
+        to_user_name = request_json["ToUserName"]
+        user_content = request_json["Content"]
+    except Exception:
+        print(traceback.format_exc())
+        return make_succ_empty_response()
+
+    # Process.
+    response_content = ""
+    if user_content.contains("亚亚"):
+        func_content = ""
+        if user_content.contains("笑话"):
+            # 笑话开头列表
+            startings = [
+                "为什么程序员总是忘记日期？",
+                "为什么程序员不喜欢自然光？",
+                "为什么程序员总是混淆圣诞节和万圣节？",
+            ]
+
+            # 笑话结尾列表
+            endings = [
+                "因为他们的日历上只有二进制。",
+                "因为他们更喜欢黑暗——它不会导致bug。",
+                "因为 Oct 31 == Dec 25。",
+            ]
+            # 随机选择一个开头和一个结尾
+            joke_starting = random.choice(startings)
+            joke_ending = random.choice(endings)
+            func_content = f"给你讲个笑话：\n{joke_starting} \n {joke_ending}\n哈哈哈，好笑不!"
+        else:
+            func_content = f"我要去带娃了，没时间实现这个功能，先重复下你的话吧:\n{user_content}\n爱你！"
+        response_content = f"欧，是我最爱的老婆:\n{func_content}"
+    else:
+        response_content = f"你谁呀，我只能把你话重复一遍:{user_content}"
+
+    # Generete response json.
+    response_json = {
+        "ToUserName": from_user_name,
+        "FromUserName": to_user_name,
+        "CreateTime": int(datetime.now().timestamp()),
+        "MsgType": "text",
+        "Content": response_content,
+    }
+
     try:
         app.logger.info(f'Request method: {request.method}')
         app.logger.info(f'Request headers: {request.headers}')
@@ -25,8 +72,7 @@ def service():
     except Exception:
         app.logger.error(traceback.format_exc())
 
-    data = {"hello": "world"}
-    return make_succ_response(data)
+    return make_succ_response(response_json)
 
 @app.route('/api/count', methods=['POST'])
 def count():
