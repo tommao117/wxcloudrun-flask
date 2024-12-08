@@ -5,6 +5,8 @@ from wxcloudrun.dao import delete_counterbyid, query_counterbyid, insert_counter
 from wxcloudrun.model import Counters
 from wxcloudrun.response import make_succ_empty_response, make_succ_response, make_err_response
 
+import traceback
+
 
 @app.route('/')
 def index():
@@ -13,6 +15,18 @@ def index():
     """
     return render_template('index.html')
 
+@app.route('/api/service', methods=['GET', 'POST'])
+def service():
+    try:
+        app.logger.info(f'Request method: {request.method}')
+        app.logger.info(f'Request headers: {request.headers}')
+        app.logger.info(f'Request form: {request.form}')
+        app.logger.info(f'Request data: {request.data}')
+    except Exception:
+        app.logger.error(traceback.format_exc())
+
+    data = {"hello": "world"}
+    return make_succ_response(data)
 
 @app.route('/api/count', methods=['POST'])
 def count():
